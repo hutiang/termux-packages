@@ -1,0 +1,68 @@
+
+https://github.com/termux/termux-packages
+
+修改包名
+
+/scripts/properties.sh
+
+修改 属性  、
+TERMUX_APP_PACKAGE="com.termux" 
+TERMUX_REPO_PACKAGE="com.termux"
+改为自己的
+
+
+Linux安装 docker 
+
+卸载旧版本的Docker
+sudo apt-get remove docker docker-engine docker.io
+安装Docker
+sudo apt install docker.io
+
+启动和自动化 Docker需要将 Docker 服务设置为在启动时运行，输入命令：
+sudo systemctl start docker
+sudo systemctl enable docker
+
+检查 Docker 版本
+docker --version
+
+docker配置镜像加速器sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://2zbar8n3.mirror.aliyuncs.com",
+          "https://ghcr.nju.edu.cn",
+          "https://docker.1panel.live",
+          "https://docker.nju.edu.cn",
+          "https://registry.docker-cn.com",
+          "http://hub-mirror.c.163.com",
+          "https://docker.mirrors.ustc.edu.cn"
+          ]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+
+
+获取https://github.com/termux/termux-packages仓库
+
+修改termux-packages/scripts/build/termux_step_setup_variables.sh(最好修改所有的package_name):
+
+"${TERMUX_PREFIX:="/data/data/$package_name/files/usr"}"
+"${TERMUX_ANDROID_HOME:="/data/data/$package_name/files/home"}"
+
+运行docker脚本进入docker容器:./scripts/run-docker.sh
+
+在容器中开始编译过程：./build-package.sh -a arch $lib_name，会在debs目录下生成对应的deb包。
+
+或在容器中开始编译： ./scripts/build-bootstraps.sh --architectures aarch64 ，会在output目录生成对应bootstraps.zip包
+
+我在编译时使用的是-a参数值是all，必需的package可以在编译脚本中看到(下文会提到)。在build的过程中可能会出现依赖包下载失败的问题，可以在网上查找对应的依赖包下载之后放置到某个地方，然后修改对应packages的build.sh脚本参数，使之从自己定义的url出下载依赖包，build.sh的位置在：termux-packages/packages/$package/build.sh。
+
+
+它需要使用变量 $TERMUX_SCRIPTDIR/scripts 而不是 $0 扩展（ generate-bootstraps.sh 没有 main() 函数，所以为它工作）。已经注意到本地并修复了它，并且 build-bootstraps.sh 还因其他事情而损坏（您可以搜索），请等待未来几天的修复，工作正在进行中。
+
+build-bootstraps.sh
+204行  "$(dirname "$(realpath "$0")")/bootstrap/termux-bootstrap-second-stage.sh" \ 
+
+
+
