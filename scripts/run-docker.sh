@@ -23,7 +23,9 @@ else
 	VOLUME=$REPOROOT:$CONTAINER_HOME_DIR/termux-packages
 fi
 
-: ${TERMUX_BUILDER_IMAGE_NAME:=ghcr.io/termux/package-builder}
+
+: ${TERMUX_BUILDER_IMAGE_NAME:=docker.1panel.live/hubmirrorbytogettoyou/ghcr.io.termux.package-builder}
+#: ${TERMUX_BUILDER_IMAGE_NAME:=ghcr.io/termux/package-builder}
 : ${CONTAINER_NAME:=termux-package-builder}
 
 USER=builder
